@@ -1,0 +1,26 @@
+services:
+  mongodb:
+    image: mongo:latest
+    restart: always # Restart if there's a failure
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: yanapajdb # Use a suitable database name
+    ports:
+      - "27017:27017"
+
+  yanapaj-service:
+    build: ./yanapaj-service # Path to your backend Dockerfile
+    ports:
+      - "8080:8080" # Expose Spring Boot's default port
+    depends_on:
+      - mongodb # Ensure MongoDB starts before your backend
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:secret@mongodb:27017/yanapajdb?authSource=admin
+
+  yanapaj-ui:
+    build: ./yanapaj-ui # Path to your frontend Dockerfile
+    ports:
+      - "3000:80" # Expose a common frontend port
+    depends_on:
+      - yanapaj-service # Ensure the backend is up before the frontend
