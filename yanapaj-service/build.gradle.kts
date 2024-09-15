@@ -25,6 +25,7 @@ repositories {
 }
 
 extra["springModulithVersion"] = "1.2.3"
+extra["jwtVersion"] = "0.12.6"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
@@ -32,6 +33,15 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webflux")
 	implementation("org.springframework.modulith:spring-modulith-starter-core")
 	implementation("org.springframework.session:spring-session-core")
+	// https://mvnrepository.com/artifact/jakarta.validation/jakarta.validation-api
+	implementation("jakarta.validation:jakarta.validation-api")
+	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
+	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
+	implementation("io.jsonwebtoken:jjwt-impl:0.12.6")
+	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
+	implementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
+
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
