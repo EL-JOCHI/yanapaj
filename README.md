@@ -43,7 +43,16 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### 🍃 `yanapej-service`
 
-**Run the Application:**
+#### Configurations
+- `jwt.secret`: To set this value, you need to generate a stronger, cryptographically secure secret key that is at least 256 bits long.
+  Here's how to generate a secure secret key:
+  
+  - Using openssl (Recommended):
+    `openssl rand -base64 32  # Generates a 256-bit (32 bytes) key`
+    This will output a random string of characters. Copy this string.
+
+
+#### Run the Application:
 - Run:
   ```bash
   ./gradlew bootRun
