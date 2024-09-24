@@ -1,5 +1,6 @@
 package com.mahatec.yapanaj.auth.services;
 
+import com.mahatec.yapanaj.auth.controllers.requests.LoginRequest;
 import com.mahatec.yapanaj.auth.controllers.requests.SignupRequest;
 import com.mahatec.yapanaj.auth.entities.User;
 import com.mahatec.yapanaj.auth.jwt.JwtHelper;
@@ -34,4 +35,10 @@ public final class AuthenticationService {
                 .map(user -> jwtHelper.generateToken(user.getEmail()));
     }
 
+    public Mono<String> login(final LoginRequest loginRequest) {
+        return userRepository.findByEmail(loginRequest.email())
+                .filter(user -> passwordEncoder.matches(loginRequest.password(), user.getPassword()))
+                .map(user -> jwtHelper.generateToken(user.getEmail()))
+                .switchIfEmpty(Mono.error(new RuntimeException("Invalid credentials")));
+    }
 }
