@@ -41,6 +41,9 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-impl:0.12.6")
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
 	implementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
+	// https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api
+	compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
+
 
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
