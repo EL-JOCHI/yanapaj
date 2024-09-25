@@ -2,6 +2,7 @@ package com.mahatec.yapanaj.auth.converter;
 
 import com.mahatec.yapanaj.auth.jwt.JwtHelper;
 import com.mahatec.yapanaj.auth.jwt.JwtToken;
+import com.mahatec.yapanaj.auth.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -14,13 +15,14 @@ import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
-class JwtServerAuthenticationConverter implements ServerAuthenticationConverter {
+final class JwtServerAuthenticationConverter implements ServerAuthenticationConverter {
 
     private static final String BEARER = "Bearer ";
     private final JwtHelper jwtService;
+    private final UserRepository userRepository;
 
     @Override
-    public Mono<Authentication> convert(ServerWebExchange exchange) {
+    public Mono<Authentication> convert(final ServerWebExchange exchange) {
         return Mono.justOrEmpty(
                         exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION))
                 .filter(header -> header.startsWith(BEARER))
@@ -28,7 +30,7 @@ class JwtServerAuthenticationConverter implements ServerAuthenticationConverter 
                 .map(token -> new JwtToken(token, createUserDetails(token)));
     }
 
-    private UserDetails createUserDetails(String token) {
+    private UserDetails createUserDetails(final String token) {
         String username = jwtService.extractUsername(token);
         return User.builder().username(username).password("").build();
     }

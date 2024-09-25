@@ -1,13 +1,12 @@
 package com.mahatec.yapanaj.tasks.models;
 
-import com.mahatec.yapanaj.auth.models.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "tasks")
@@ -25,5 +24,5 @@ public class Task {
 
     private TaskStatus status = TaskStatus.TODO;
 
-    @DBRef private User user;
+    @JsonIgnore private String userEmail;
 }
