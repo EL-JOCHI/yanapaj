@@ -31,6 +31,7 @@ public class AuthSecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers("/api/v1/auth/signup").permitAll()
                         .pathMatchers("/api/v1/auth/login").permitAll()
+                        .pathMatchers("/v1/yanapaj/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)

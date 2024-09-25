@@ -1,4 +1,4 @@
-package com.mahatec.yapanaj.auth.entities;
+package com.mahatec.yapanaj.auth.models;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

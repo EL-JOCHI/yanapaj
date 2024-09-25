@@ -1,4 +1,4 @@
-package com.mahatec.yapanaj.converter;
+package com.mahatec.yapanaj.auth.converter;
 
 import com.mahatec.yapanaj.auth.jwt.JwtHelper;
 import com.mahatec.yapanaj.auth.jwt.JwtToken;

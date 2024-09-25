@@ -43,6 +43,8 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
 	// https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api
 	compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
+	// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webflux-ui
+	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")
 
 
 	compileOnly("org.projectlombok:lombok")
