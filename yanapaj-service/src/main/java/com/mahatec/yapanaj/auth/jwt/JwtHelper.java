@@ -4,12 +4,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.impl.lang.Function;
 import io.jsonwebtoken.security.Keys;
+import java.util.Date;
+import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
-import java.util.Date;
 
 @Component
 public final class JwtHelper {
@@ -17,12 +16,12 @@ public final class JwtHelper {
     private final SecretKey secretKey;
     private final long expirationTime;
 
-    public JwtHelper(@Value("${jwt.secret}") String secret,
-                     @Value("${jwt.expiration:10000}") long expirationTime) {
+    public JwtHelper(
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.expiration:10000}") long expirationTime) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
         this.expirationTime = expirationTime;
     }
-
 
     public String generateToken(String username) {
         final Date now = new Date();
@@ -58,11 +57,6 @@ public final class JwtHelper {
     }
 
     private Claims extractAllClaims(final String token) {
-        return Jwts.parser()
-                .verifyWith(secretKey)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload();
     }
-
 }

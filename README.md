@@ -4,6 +4,30 @@ designed to help users efficiently organize and manage their tasks.
 
 ## 💻 Quick Start
 ### 🚀 Running with Docker Compose
+This section guides you through running the Yanapaj application using Docker Compose.
+
+### 🔐 Setting up the JWT Secret Key
+
+Before starting the application, you need to generate a secure secret key for JWT authentication. This key is used to sign and verify JSON Web Tokens, ensuring secure communication between the frontend and backend services.
+
+1. **Navigate to the `yanapaj-service` directory:**
+
+   ```bash
+   cd yanapaj-service
+   ```
+
+2. **Generate and set the JWT secret key:**
+
+   ```bash
+   chmod +x generate_jwt_secret.sh
+   ./generate_jwt_secret.sh
+   ```
+
+   This script does the following:
+    - Generates a strong, URL-safe JWT secret key using `openssl`.
+    - Updates the `jwt.secret` property in the `src/main/resources/application.properties` file with the generated key.
+
+### 🐳 Starting the Application
 
 1. **Start the Application:**
    ```bash
@@ -30,6 +54,15 @@ If you make changes to the source code, you'll need to rebuild the images:
 docker-compose up -d --build
 ```
 
+### 🎉 Accessing Yanapaj 🎉
+
+Once you've successfully started the application with Docker Compose, you can access it in two ways:
+
+1. **✨ Yanapaj Web UI:** Open your web browser and go to:
+   [http://localhost:3000](http://localhost:3000)
+
+2. **📖 Yanapaj API Documentation (Swagger UI):**  Explore the API documentation and interact with your backend endpoints here:
+   [http://localhost:8080/v1/yanapaj/swagger-ui.html](http://localhost:8080/v1/yanapaj/swagger-ui.html)
 ## ⚙ Develop
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
