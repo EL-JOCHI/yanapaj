@@ -6,11 +6,15 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@OpenAPIDefinition(info = @Info(title = "Yanapaj API", version = "1.0", description = "Yanapaj API documentation"))
+@OpenAPIDefinition(
+        info =
+                @Info(
+                        title = "Yanapaj API",
+                        version = "1.0",
+                        description = "Yanapaj API documentation"))
 public class YanapajServiceApplication {
 
     public static void main(String... args) {
         SpringApplication.run(YanapajServiceApplication.class, args);
     }
-
 }

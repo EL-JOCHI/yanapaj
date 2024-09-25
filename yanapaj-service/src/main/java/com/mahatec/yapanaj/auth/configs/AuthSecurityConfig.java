@@ -19,21 +19,27 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 public class AuthSecurityConfig {
 
     @Bean
-    SecurityWebFilterChain springWebFilterChain(final ServerHttpSecurity http,
-                                                final ReactiveAuthenticationManager authenticationManager,
-                                                final ServerAuthenticationConverter authenticationConverter) {
+    SecurityWebFilterChain springWebFilterChain(
+            final ServerHttpSecurity http,
+            final ReactiveAuthenticationManager authenticationManager,
+            final ServerAuthenticationConverter authenticationConverter) {
 
-        final AuthenticationWebFilter authenticationWebFilter = new AuthenticationWebFilter(authenticationManager);
+        final AuthenticationWebFilter authenticationWebFilter =
+                new AuthenticationWebFilter(authenticationManager);
         authenticationWebFilter.setServerAuthenticationConverter(authenticationConverter);
 
-        return http
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .authorizeExchange(exchanges -> exchanges
-                        .pathMatchers("/api/v1/auth/signup").permitAll()
-                        .pathMatchers("/api/v1/auth/login").permitAll()
-                        .pathMatchers("/v1/yanapaj/**").permitAll()
-                        .anyExchange().authenticated()
-                )
+        return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .authorizeExchange(
+                        exchanges ->
+                                exchanges
+                                        .pathMatchers("/api/v1/auth/signup")
+                                        .permitAll()
+                                        .pathMatchers("/api/v1/auth/login")
+                                        .permitAll()
+                                        .pathMatchers("/v1/yanapaj/**")
+                                        .permitAll()
+                                        .anyExchange()
+                                        .authenticated())
                 .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
@@ -45,5 +51,4 @@ public class AuthSecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }

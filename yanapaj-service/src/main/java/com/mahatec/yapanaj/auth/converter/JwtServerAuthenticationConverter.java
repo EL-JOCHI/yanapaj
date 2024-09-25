@@ -21,7 +21,8 @@ class JwtServerAuthenticationConverter implements ServerAuthenticationConverter 
 
     @Override
     public Mono<Authentication> convert(ServerWebExchange exchange) {
-        return Mono.justOrEmpty(exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION))
+        return Mono.justOrEmpty(
+                        exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION))
                 .filter(header -> header.startsWith(BEARER))
                 .map(header -> header.substring(BEARER.length()))
                 .map(token -> new JwtToken(token, createUserDetails(token)));
@@ -29,10 +30,6 @@ class JwtServerAuthenticationConverter implements ServerAuthenticationConverter 
 
     private UserDetails createUserDetails(String token) {
         String username = jwtService.extractUsername(token);
-        return User.builder()
-                .username(username)
-                .password("")
-                .build();
+        return User.builder().username(username).password("").build();
     }
-
 }

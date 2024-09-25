@@ -9,5 +9,4 @@ import reactor.core.publisher.Flux;
 public interface TaskRepository extends ReactiveMongoRepository<Task, String> {
 
     Flux<Task> findAllByUser(User user, Pageable pageable);
-
 }

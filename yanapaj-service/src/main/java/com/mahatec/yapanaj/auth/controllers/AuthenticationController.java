@@ -28,17 +28,20 @@ public class AuthenticationController {
     @PostMapping("/signup")
     public Mono<ResponseEntity<String>> signup(@RequestBody SignupRequest signupRequest) {
         log.info("Signup request: {}", signupRequest);
-        return authenticationService.signUp(signupRequest)
-                .map(user -> ResponseEntity.status(HttpStatus.CREATED)
-                        .body(user));
+        return authenticationService
+                .signUp(signupRequest)
+                .map(user -> ResponseEntity.status(HttpStatus.CREATED).body(user));
     }
 
     @PostMapping("/login")
     public Mono<ResponseEntity<String>> login(@RequestBody LoginRequest loginRequest) {
         log.info("Login request: {}", loginRequest.email());
-        return authenticationService.login(loginRequest)
+        return authenticationService
+                .login(loginRequest)
                 .map(ResponseEntity::ok)
-                .onErrorReturn(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()); // Handle invalid credentials
+                .onErrorReturn(
+                        ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .build()); // Handle invalid credentials
     }
 
     @PreAuthorize(value = "isAuthenticated()")
@@ -46,13 +49,15 @@ public class AuthenticationController {
     public Mono<ResponseEntity<Void>> logout() {
         return ReactiveSecurityContextHolder.getContext()
                 .map(SecurityContext::getAuthentication)
-                .doOnNext(authentication -> {
-                    if (authentication != null && authentication.getPrincipal() instanceof UserDetails userDetails) {
-                        final String username = userDetails.getUsername();
-                        log.info("Logout request received from: {}!!", username);
-                    }
-                })
+                .doOnNext(
+                        authentication -> {
+                            if (authentication != null
+                                    && authentication.getPrincipal()
+                                            instanceof UserDetails userDetails) {
+                                final String username = userDetails.getUsername();
+                                log.info("Logout request received from: {}!!", username);
+                            }
+                        })
                 .thenReturn(ResponseEntity.ok().build());
     }
-
 }
