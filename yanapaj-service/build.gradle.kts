@@ -2,6 +2,7 @@ plugins {
 	java
 	id("org.springframework.boot") version "3.3.3"
 	id("io.spring.dependency-management") version "1.1.6"
+	id("com.diffplug.spotless") version "7.0.0.BETA2"
 }
 
 group = "com.mahatec"
@@ -25,7 +26,9 @@ repositories {
 }
 
 extra["springModulithVersion"] = "1.2.3"
-extra["jwtVersion"] = "0.12.6"
+val jwtVersion = "0.12.6"
+val springdocVersion = "2.6.0"
+val jakartaServletApiVersion = "6.1.0"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive")
@@ -36,17 +39,16 @@ dependencies {
 	// https://mvnrepository.com/artifact/jakarta.validation/jakarta.validation-api
 	implementation("jakarta.validation:jakarta.validation-api")
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api
-	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+	implementation("io.jsonwebtoken:jjwt-api:$jwtVersion")
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-impl
-	implementation("io.jsonwebtoken:jjwt-impl:0.12.6")
+	implementation("io.jsonwebtoken:jjwt-impl:$jwtVersion")
 	// https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson
-	implementation("io.jsonwebtoken:jjwt-jackson:0.12.6")
-	// https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api
-	compileOnly("jakarta.servlet:jakarta.servlet-api:6.1.0")
+	implementation("io.jsonwebtoken:jjwt-jackson:$jwtVersion")
 	// https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webflux-ui
-	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0")
+	implementation("org.springdoc:springdoc-openapi-starter-webflux-ui:$springdocVersion")
 
-
+	// https://mvnrepository.com/artifact/jakarta.servlet/jakarta.servlet-api
+	compileOnly("jakarta.servlet:jakarta.servlet-api:$jakartaServletApiVersion")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	developmentOnly("org.springframework.boot:spring-boot-docker-compose")
@@ -67,4 +69,15 @@ dependencyManagement {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+spotless {
+	java {
+		importOrder()
+		// Removing this momentary, until a fix is present: https://github.com/diffplug/spotless/issues/2159
+		// removeUnusedImports()
+		cleanthat()
+		googleJavaFormat().aosp()
+		formatAnnotations()
+	}
 }
