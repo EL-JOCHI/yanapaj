@@ -1,4 +1,4 @@
-package com.mahatec.yapanaj.auth.controllers.requests;
+package com.mahatec.yapanaj.auth.requests;
 
 public record LoginRequest(String email, String password) {
 }

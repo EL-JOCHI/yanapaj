@@ -2,11 +2,14 @@ package com.mahatec.yapanaj.tasks.models;
 
 import com.mahatec.yapanaj.auth.models.User;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.Date;
 
 @Document(collection = "tasks")
 @Getter
@@ -20,6 +23,11 @@ public class Task {
     private String title;
 
     private String description;
+
+    @NotNull
+    private Date dueDate;
+
+    private TaskStatus status = TaskStatus.TODO;
 
     @DBRef
     private User user;

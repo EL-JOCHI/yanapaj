@@ -1,7 +1,7 @@
 package com.mahatec.yapanaj.auth.controllers;
 
-import com.mahatec.yapanaj.auth.controllers.requests.LoginRequest;
-import com.mahatec.yapanaj.auth.controllers.requests.SignupRequest;
+import com.mahatec.yapanaj.auth.requests.LoginRequest;
+import com.mahatec.yapanaj.auth.requests.SignupRequest;
 import com.mahatec.yapanaj.auth.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

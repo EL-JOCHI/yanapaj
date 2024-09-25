@@ -1,7 +1,7 @@
 package com.mahatec.yapanaj.auth.services;
 
-import com.mahatec.yapanaj.auth.controllers.requests.LoginRequest;
-import com.mahatec.yapanaj.auth.controllers.requests.SignupRequest;
+import com.mahatec.yapanaj.auth.requests.LoginRequest;
+import com.mahatec.yapanaj.auth.requests.SignupRequest;
 import com.mahatec.yapanaj.auth.models.User;
 import com.mahatec.yapanaj.auth.jwt.JwtHelper;
 import com.mahatec.yapanaj.auth.repositories.UserRepository;

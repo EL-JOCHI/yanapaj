@@ -1,4 +1,4 @@
-package com.mahatec.yapanaj.auth.controllers.requests;
+package com.mahatec.yapanaj.auth.requests;
 
 
 import jakarta.validation.constraints.Email;
