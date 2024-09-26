@@ -55,7 +55,9 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    transition: color 0.5s ease, background-color 0.5s ease;
+    transition:
+      color 0.5s ease,
+      background-color 0.5s ease;
   }
 }
 
@@ -66,4 +68,21 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@font-face {
+  font-family: "InsideOut";
+  src: local("InsideOut"),
+    url("./assets/fonts/your-shirts-inside-out-font/InsideOut-DAp0.ttf");
+}
+
+@font-face {
+  font-family: "Ramen";
+  src: local("Ramen"), url("./assets/fonts/ramen-font/Ramen-JpnMM.otf");
+}
+
+@font-face {
+  font-family: "InsideOutRegular";
+  src: local("InsideOutRegular"),
+    url("./assets/fonts/inside-out-lowercase-font/InsideOutLowercase-BA0G.ttf");
 }

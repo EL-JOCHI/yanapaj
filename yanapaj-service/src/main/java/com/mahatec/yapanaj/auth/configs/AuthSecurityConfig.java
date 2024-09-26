@@ -2,6 +2,7 @@ package com.mahatec.yapanaj.auth.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -29,9 +30,12 @@ public class AuthSecurityConfig {
         authenticationWebFilter.setServerAuthenticationConverter(authenticationConverter);
 
         return http.csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .cors(ServerHttpSecurity.CorsSpec::disable)
                 .authorizeExchange(
                         exchanges ->
                                 exchanges
+                                        .pathMatchers(HttpMethod.OPTIONS, "/api/v1/auth/**")
+                                        .permitAll()
                                         .pathMatchers("/api/v1/auth/signup")
                                         .permitAll()
                                         .pathMatchers("/api/v1/auth/login")
@@ -43,7 +47,6 @@ public class AuthSecurityConfig {
                 .addFilterAt(authenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-                .cors(ServerHttpSecurity.CorsSpec::disable)
                 .build();
     }
 

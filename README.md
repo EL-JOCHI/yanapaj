@@ -25,7 +25,8 @@ Before starting the application, you need to generate a secure secret key for JW
 
    This script does the following:
     - Generates a strong, URL-safe JWT secret key using `openssl`.
-    - Updates the `jwt.secret` property in the `src/main/resources/application.properties` file with the generated key.
+    - Updates the `jwt.secret` property in the [application.properties](yanapaj-service/src/main/resources/application.properties) file with the generated key.
+    - Updates the `jwt.secret` property in the [application-test.properties](yanapaj-service/src/test/resources/application-test.properties) file with the generated key.
 
 ### 🐳 Starting the Application
 
@@ -102,7 +103,7 @@ These instructions will get you a copy of the project up and running on your loc
 
 2. **Start the Development Server:**
    ```bash
-   npm start
+   npm run dev
    ```
    You can access the UI at `http://localhost:3000`.
 

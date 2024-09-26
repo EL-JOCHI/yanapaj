@@ -10,10 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
@@ -38,19 +35,19 @@ public class TaskService {
     }
 
     public Mono<Page<Task>> getTasksByUserEmail(final String email, Pageable pageable) {
-        return taskRepository.findAllByUserEmail(email, pageable)
+        return taskRepository
+                .findAllByUserEmail(email, pageable)
                 .collectList()
                 .zipWith(taskRepository.countByUserEmail(email))
                 .map(page -> new PageImpl<>(page.getT1(), pageable, page.getT2()));
     }
 
     public Mono<Task> getTaskById(final String id, final String userEmail) {
-        return taskRepository
-                .findById(id)
-                .filter(task -> task.getUserEmail().equals(userEmail));
+        return taskRepository.findById(id).filter(task -> task.getUserEmail().equals(userEmail));
     }
 
-    public Mono<Task> updateTask(final String id, final TaskRequest taskRequest, final String userEmail) {
+    public Mono<Task> updateTask(
+            final String id, final TaskRequest taskRequest, final String userEmail) {
         return taskRepository
                 .findById(id)
                 .filter(task -> task.getUserEmail().equals(userEmail))
@@ -73,8 +70,10 @@ public class TaskService {
                 .findById(id)
                 .filter(task -> task.getUserEmail().equals(userEmail))
                 .flatMap(
-                        taskToDelete -> taskRepository.delete(taskToDelete) // Delete the task
-                                .thenReturn(taskToDelete) // Return the deleted task
-                );
+                        taskToDelete ->
+                                taskRepository
+                                        .delete(taskToDelete) // Delete the task
+                                        .thenReturn(taskToDelete) // Return the deleted task
+                        );
     }
 }
