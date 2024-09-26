@@ -23,7 +23,7 @@ public final class JwtHelper {
         this.expirationTime = expirationTime;
     }
 
-    public String generateToken(String username) {
+    public String generateToken(final String username) {
         final Date now = new Date();
         final Date expiryDate = new Date(now.getTime() + expirationTime);
         return Jwts.builder()
