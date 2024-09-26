@@ -67,3 +67,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+@font-face{
+  font-family: "InsideOut";
+  src:local("InsideOut"),
+  url('./assets/fonts/your-shirts-inside-out-font/InsideOut-DAp0.ttf')
+}
+
+@font-face {
+  font-family: "Ramen";
+  src: local("Ramen"),
+  url('./assets/fonts/ramen-font/Ramen-JpnMM.otf');
+}
+
+@font-face {
+  font-family: "InsideOutRegular";
+  src: local("InsideOutRegular"),
+  url('./assets/fonts/inside-out-lowercase-font/InsideOutLowercase-BA0G.ttf');
+}

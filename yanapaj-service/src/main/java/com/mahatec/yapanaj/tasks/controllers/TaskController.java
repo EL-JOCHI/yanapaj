@@ -11,13 +11,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -59,11 +66,15 @@ public class TaskController {
         final Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
 
         return userDetailsMono
-                .flatMap(userDetails -> taskService.getTasksByUserEmail(userDetails.getUsername(), pageable))
-                .switchIfEmpty(Mono.error(
-                        new ResponseStatusException(
-                                HttpStatus.NOT_FOUND,
-                                "User not found or no tasks available")));
+                .flatMap(
+                        userDetails ->
+                                taskService.getTasksByUserEmail(
+                                        userDetails.getUsername(), pageable))
+                .switchIfEmpty(
+                        Mono.error(
+                                new ResponseStatusException(
+                                        HttpStatus.NOT_FOUND,
+                                        "User not found or no tasks available")));
     }
 
     @PreAuthorize(value = "isAuthenticated()")
@@ -80,7 +91,6 @@ public class TaskController {
                                                         HttpStatus.NOT_FOUND,
                                                         "Task not found or you don't have permission to access it."))));
     }
-
 
     @PreAuthorize(value = "isAuthenticated()")
     @PutMapping("/{id}")

@@ -11,5 +11,4 @@ public interface TaskRepository extends ReactiveMongoRepository<Task, String> {
     Flux<Task> findAllByUserEmail(String email, Pageable pageable);
 
     Mono<Long> countByUserEmail(String email);
-
 }
