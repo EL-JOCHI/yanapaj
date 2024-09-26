@@ -9,14 +9,24 @@ const getAuthToken = (): string | null => {
 export const apiClient = createClient(
   createConfig({
     withCredentials: true, // Important for CORS with credentials
-    headers: {
-      Authorization: getAuthToken() ? `Bearer ${getAuthToken()}` : undefined,
-    },
   }),
 );
 
 // Optionally, copy over any custom configurations from the generated client
 apiClient.setConfig(generatedClient.getConfig());
+
+apiClient.instance.interceptors.request.use(
+  (config) => {
+    const token = getAuthToken(); // Get the token on each request
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
 apiClient.instance.interceptors.response.use(
   (response) => response,

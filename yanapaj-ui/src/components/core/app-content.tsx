@@ -5,6 +5,7 @@ import Login from "@/components/login/login.tsx";
 import Register from "@/components/login/register.tsx";
 import Dashboard from "@/components/tasks/dashboard.tsx";
 import ProtectedRoute from "@/components/login/protected-route.tsx";
+import TaskView from "@/components/tasks/task-view.tsx";
 
 const AppContent = () => {
   const { isLoggedIn } = useAuth();
@@ -22,6 +23,7 @@ const AppContent = () => {
         />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/tasks" element={<TaskView />} />
         </Route>
       </Routes>
     </>
