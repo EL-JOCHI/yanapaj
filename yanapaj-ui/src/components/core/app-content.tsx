@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/auth-context.tsx";
 import Navbar from "@/components/core/navigation/navbar.tsx";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "@/components/login/login.tsx";
 import Register from "@/components/login/register.tsx";
 import Dashboard from "@/components/tasks/dashboard.tsx";
@@ -12,8 +12,14 @@ const AppContent = () => {
     <>
       {isLoggedIn && <Navbar />}
       <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/"
+          element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />}
+        />
+        <Route
+          path="/register"
+          element={isLoggedIn ? <Navigate to="/dashboard" /> : <Register />}
+        />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
         </Route>
