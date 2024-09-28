@@ -24,7 +24,7 @@ public class TaskService {
         task.setTitle(taskRequest.title());
         task.setDescription(taskRequest.description());
         task.setDueDate(taskRequest.dueDate());
-        task.setStatus(TaskStatus.TODO);
+        task.setStatus(taskRequest.status() != null ? taskRequest.status() : TaskStatus.TODO);
         task.setUserEmail(userEmail);
         log.debug("Saving task: {}", task);
         return taskRepository

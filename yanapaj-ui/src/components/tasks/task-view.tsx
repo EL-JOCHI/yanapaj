@@ -2,19 +2,34 @@ import { useCallback, useEffect, useState } from "react";
 import TaskGridView from "./task-grid-view";
 import TaskListView from "./task-list-view";
 import { Task, TaskControllerService } from "@/client";
-import { apiClient } from "@/api/api-client.ts"; // We'll create this component next
-import { Grid2x2, List } from "lucide-react";
+import { apiClient } from "@/api/api-client.ts";
+import TaskToolbar from "@/components/tasks/task-toolbar.tsx";
+import TaskModal from "@/components/tasks/task-modal.tsx";
+import { toast } from "@/hooks/use-toast.ts";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog.tsx";
 
 export default function TaskView() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const [tasks, setTasks] = useState<Task[]>([]); // State for tasks
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         const response = await TaskControllerService.getTasks({
           client: apiClient,
+
         });
         const content = response.data?.content || [];
         setTasks(content);
@@ -37,61 +52,123 @@ export default function TaskView() {
         path: { id: updatedTask.id! },
       });
 
-      const updatedTaskFromBackend: Task = response.data as Task;
+      if (response.status === 200 && response.data) {
+        const updatedTaskFromBackend: Task = response.data;
 
-      // Update the tasks state with the updated task from the backend
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === updatedTask.id ? updatedTaskFromBackend : task,
-        ),
-      );
+        // Update the tasks state with the updated task from the backend
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === updatedTask.id ? updatedTaskFromBackend : task,
+          ),
+        );
+
+        toast({
+          title: "✅ Task Updated",
+          description: "Task was updated successfully!",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description:
+            "Failed to update task. Unexpected response from server.",
+          variant: "destructive",
+        });
+      }
+      setIsEditModalOpen(false);
     } catch (error) {
       console.error("Error updating task status:", error);
       // Handle error, e.g., revert the drag and drop operation or display an error message
     }
   }, []);
 
+  const handleTaskCreate = useCallback(async (newTask: Task) => {
+    try {
+      const response = await TaskControllerService.createTask({
+        client: apiClient,
+        body: newTask,
+      });
+
+      if (response.status === 201 && response.data) {
+        const taskCreatedFromBackend: Task = response.data;
+
+        // Update the tasks state with the updated task from the backend
+        setTasks((prevTasks) => [taskCreatedFromBackend, ...prevTasks]);
+
+        toast({
+          title: "✅ Task Added",
+          description:
+            "Task was added successfully!",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description:
+            "Failed to create task. Unexpected response from server.",
+          variant: "default",
+        });
+      }
+      setIsTaskFormOpen(false);
+    } catch (error) {
+      console.error("Error creating task:", error);
+    }
+  }, []);
+
+  const handleConfirmDelete = useCallback(async () => {
+    try {
+      if (taskToDelete) {
+        const response = await TaskControllerService.deleteTask({
+          client: apiClient,
+          path: { id: taskToDelete.id! },
+        });
+        if (response.status === 204) {
+          setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskToDelete.id));
+          toast({
+            title: "✅Task Deleted",
+            description: "Task was deleted successfully!",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to delete task.",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete task.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteModalOpen(false);
+      setTaskToDelete(null);
+    }
+  }, [taskToDelete]);
+
   // Placeholder handlers for onEdit and onDelete
   const handleEdit = (task: Task) => {
-    console.log("Edit task:", task);
-    // Implement your edit logic here
+    setTaskToEdit(task);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = (task: Task) => {
-    console.log("Delete task:", task);
-    // Implement your delete logic here
+    setTaskToDelete(task);
+    setIsDeleteModalOpen(true);
   };
 
-  const handleViewChange = (mode: "grid" | "list") => {
-    setViewMode(mode);
-  };
-
+  // @ts-ignore
   return (
     <div>
-      <div className="flex justify-end mb-4 space-x-2">
-        <button
-          onClick={() => handleViewChange("grid")}
-          className={`px-2 py-2 rounded-md font-medium transition-colors duration-200 
-                     ${
-                       viewMode === "grid"
-                         ? "bg-indigo-500 text-sky-50 dark:bg-indigo-950"
-                         : "bg-gray-200 hover:bg-indigo-300 text-gray-700 dark:text-gray-900"
-                     }`}
-        >
-          <Grid2x2 />
-        </button>
-        <button
-          onClick={() => handleViewChange("list")}
-          className={`px-2 py-2 rounded-md font-medium transition-colors duration-200 
-                     ${
-                       viewMode === "list"
-                         ? "bg-indigo-500 text-sky-50 dark:bg-indigo-950"
-                         : "bg-gray-200 hover:bg-indigo-300 text-gray-700 dark:text-gray-900"
-                     }`}
-        >
-          <List />
-        </button>
-      </div>
+      <TaskToolbar
+        viewMode={viewMode}
+        onViewChange={setViewMode}
+        onAddTask={() => setIsTaskFormOpen(true)}
+      />
       {viewMode === "grid" ? (
         <TaskGridView
           tasks={tasks}
@@ -106,6 +183,34 @@ export default function TaskView() {
           onDelete={handleDelete}
         />
       )}
+
+      <TaskModal // Pass the necessary props to TaskModal
+        isOpen={isTaskFormOpen || isEditModalOpen}
+        onClose={() => {
+          setIsTaskFormOpen(false);
+          setIsEditModalOpen(false);
+        }}
+        onSubmit={isTaskFormOpen ? handleTaskCreate : handleTaskUpdate}
+        initialTask={taskToEdit}
+      />
+
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen} taskToDelete={taskToDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Task</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this task "{taskToDelete?.title}"? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
