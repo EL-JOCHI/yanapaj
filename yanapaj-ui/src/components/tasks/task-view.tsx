@@ -6,12 +6,23 @@ import { apiClient } from "@/api/api-client.ts";
 import TaskToolbar from "@/components/tasks/task-toolbar.tsx";
 import TaskModal from "@/components/tasks/task-modal.tsx";
 import { toast } from "@/hooks/use-toast.ts";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog.tsx";
 
 export default function TaskView() {
+
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [tasks, setTasks] = useState<Task[]>([]);
-
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -41,14 +52,30 @@ export default function TaskView() {
         path: { id: updatedTask.id! },
       });
 
-      const updatedTaskFromBackend: Task = response.data as Task;
+      if (response.status === 200 && response.data) {
+        const updatedTaskFromBackend: Task = response.data;
 
-      // Update the tasks state with the updated task from the backend
-      setTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === updatedTask.id ? updatedTaskFromBackend : task,
-        ),
-      );
+        // Update the tasks state with the updated task from the backend
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === updatedTask.id ? updatedTaskFromBackend : task,
+          ),
+        );
+
+        toast({
+          title: "✅ Task Updated",
+          description: "Task was updated successfully!",
+          variant: "default",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description:
+            "Failed to update task. Unexpected response from server.",
+          variant: "destructive",
+        });
+      }
+      setIsEditModalOpen(false);
     } catch (error) {
       console.error("Error updating task status:", error);
       // Handle error, e.g., revert the drag and drop operation or display an error message
@@ -69,7 +96,7 @@ export default function TaskView() {
         setTasks((prevTasks) => [taskCreatedFromBackend, ...prevTasks]);
 
         toast({
-          title: "Task Added",
+          title: "✅ Task Added",
           description:
             "Task was added successfully!",
           variant: "destructive",
@@ -88,17 +115,53 @@ export default function TaskView() {
     }
   }, []);
 
+  const handleConfirmDelete = useCallback(async () => {
+    try {
+      if (taskToDelete) {
+        const response = await TaskControllerService.deleteTask({
+          client: apiClient,
+          path: { id: taskToDelete.id! },
+        });
+        if (response.status === 204) {
+          setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskToDelete.id));
+          toast({
+            title: "✅Task Deleted",
+            description: "Task was deleted successfully!",
+            variant: "default",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to delete task.",
+            variant: "destructive",
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      toast({
+        title: "Error",
+        description: "Failed to delete task.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleteModalOpen(false);
+      setTaskToDelete(null);
+    }
+  }, [taskToDelete]);
+
   // Placeholder handlers for onEdit and onDelete
   const handleEdit = (task: Task) => {
-    console.log("Edit task:", task);
-    // Implement your edit logic here
+    setTaskToEdit(task);
+    setIsEditModalOpen(true);
   };
 
   const handleDelete = (task: Task) => {
-    console.log("Delete task:", task);
-    // Implement your delete logic here
+    setTaskToDelete(task);
+    setIsDeleteModalOpen(true);
   };
 
+  // @ts-ignore
   return (
     <div>
       <TaskToolbar
@@ -122,10 +185,32 @@ export default function TaskView() {
       )}
 
       <TaskModal // Pass the necessary props to TaskModal
-        isOpen={isTaskFormOpen}
-        onClose={() => setIsTaskFormOpen(false)}
-        onSubmit={handleTaskCreate}
+        isOpen={isTaskFormOpen || isEditModalOpen}
+        onClose={() => {
+          setIsTaskFormOpen(false);
+          setIsEditModalOpen(false);
+        }}
+        onSubmit={isTaskFormOpen ? handleTaskCreate : handleTaskUpdate}
+        initialTask={taskToEdit}
       />
+
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen} taskToDelete={taskToDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Task</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this task "{taskToDelete?.title}"? This action cannot be
+              undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

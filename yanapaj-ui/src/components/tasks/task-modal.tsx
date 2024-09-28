@@ -20,7 +20,7 @@ interface TaskFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (newTask: Task) => void;
-  initialTask?: Task; // Optional initial task for editing
+  initialTask?: Task | null;
 }
 
 const TaskModal = ({
