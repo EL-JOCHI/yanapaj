@@ -2,19 +2,23 @@ import { useCallback, useEffect, useState } from "react";
 import TaskGridView from "./task-grid-view";
 import TaskListView from "./task-list-view";
 import { Task, TaskControllerService } from "@/client";
-import { apiClient } from "@/api/api-client.ts"; // We'll create this component next
-import { Grid2x2, List } from "lucide-react";
+import { apiClient } from "@/api/api-client.ts";
+import TaskToolbar from "@/components/tasks/task-toolbar.tsx";
+import TaskModal from "@/components/tasks/task-modal.tsx";
+import { toast } from "@/hooks/use-toast.ts";
 
 export default function TaskView() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  const [tasks, setTasks] = useState<Task[]>([]); // State for tasks
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         const response = await TaskControllerService.getTasks({
           client: apiClient,
+
         });
         const content = response.data?.content || [];
         setTasks(content);
@@ -51,6 +55,39 @@ export default function TaskView() {
     }
   }, []);
 
+  const handleTaskCreate = useCallback(async (newTask: Task) => {
+    try {
+      const response = await TaskControllerService.createTask({
+        client: apiClient,
+        body: newTask,
+      });
+
+      if (response.status === 201 && response.data) {
+        const taskCreatedFromBackend: Task = response.data;
+
+        // Update the tasks state with the updated task from the backend
+        setTasks((prevTasks) => [taskCreatedFromBackend, ...prevTasks]);
+
+        toast({
+          title: "Task Added",
+          description:
+            "Task was added successfully!",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description:
+            "Failed to create task. Unexpected response from server.",
+          variant: "default",
+        });
+      }
+      setIsTaskFormOpen(false);
+    } catch (error) {
+      console.error("Error creating task:", error);
+    }
+  }, []);
+
   // Placeholder handlers for onEdit and onDelete
   const handleEdit = (task: Task) => {
     console.log("Edit task:", task);
@@ -62,36 +99,13 @@ export default function TaskView() {
     // Implement your delete logic here
   };
 
-  const handleViewChange = (mode: "grid" | "list") => {
-    setViewMode(mode);
-  };
-
   return (
     <div>
-      <div className="flex justify-end mb-4 space-x-2">
-        <button
-          onClick={() => handleViewChange("grid")}
-          className={`px-2 py-2 rounded-md font-medium transition-colors duration-200 
-                     ${
-                       viewMode === "grid"
-                         ? "bg-indigo-500 text-sky-50 dark:bg-indigo-950"
-                         : "bg-gray-200 hover:bg-indigo-300 text-gray-700 dark:text-gray-900"
-                     }`}
-        >
-          <Grid2x2 />
-        </button>
-        <button
-          onClick={() => handleViewChange("list")}
-          className={`px-2 py-2 rounded-md font-medium transition-colors duration-200 
-                     ${
-                       viewMode === "list"
-                         ? "bg-indigo-500 text-sky-50 dark:bg-indigo-950"
-                         : "bg-gray-200 hover:bg-indigo-300 text-gray-700 dark:text-gray-900"
-                     }`}
-        >
-          <List />
-        </button>
-      </div>
+      <TaskToolbar
+        viewMode={viewMode}
+        onViewChange={setViewMode}
+        onAddTask={() => setIsTaskFormOpen(true)}
+      />
       {viewMode === "grid" ? (
         <TaskGridView
           tasks={tasks}
@@ -106,6 +120,12 @@ export default function TaskView() {
           onDelete={handleDelete}
         />
       )}
+
+      <TaskModal // Pass the necessary props to TaskModal
+        isOpen={isTaskFormOpen}
+        onClose={() => setIsTaskFormOpen(false)}
+        onSubmit={handleTaskCreate}
+      />
     </div>
   );
 }
