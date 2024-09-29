@@ -67,7 +67,7 @@ const Navbar = () => {
       <div className="flex items-center space-x-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="p-2 rounded-full relative" onClick={clearNotifications}>
+            <Button variant="ghost" className="p-2 rounded-full relative">
               <BellIcon className="h-6 w-6" />
               {notificationCount > 0 && (
                 <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
@@ -77,8 +77,8 @@ const Navbar = () => {
             </Button>
           </DropdownMenuTrigger>
           {notificationCount > 0 && (
-            <DropdownMenuContent className="w-72">
-              <ul className="grid">
+            <DropdownMenuContent className="w-72" onClick={clearNotifications} key={notificationCount}>
+              <ul className="grid gap-2">
                 {notifications.map((notification) => (
                   <DropdownMenuItem key={notification.id}>
                     <Card>

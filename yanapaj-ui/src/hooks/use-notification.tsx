@@ -41,7 +41,11 @@ export const useNotification = () => {
     if (Notification.permission === 'default') {
       Notification.requestPermission();
     }
-  }, []);
+    if (isNotificationsEnabled && notifications.length > 0 && Notification.permission === 'granted') {
+      const latestNotification = notifications[notifications.length - 1];
+      new Notification(latestNotification.taskTitle, { body: latestNotification.message });
+    }
+  }, [notifications, isNotificationsEnabled]);
 
   return {
     notifications,
