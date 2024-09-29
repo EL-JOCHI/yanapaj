@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import TaskGridView from "./task-grid-view";
 import TaskListView from "./task-list-view";
 import { Task, TaskControllerService } from "@/client";
@@ -13,6 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from "@/components/ui/alert-dialog.tsx";
+import { NotificationContext } from "@/context/notification-context.tsx";
 
 export default function TaskView() {
 
@@ -23,6 +24,8 @@ export default function TaskView() {
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+
+  const { addNotification } = useContext(NotificationContext);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -62,11 +65,7 @@ export default function TaskView() {
           ),
         );
 
-        toast({
-          title: "✅ Task Updated",
-          description: "Task was updated successfully!",
-          variant: "default",
-        });
+        addNotification("✅ Task was updated successfully!", updatedTask.title);
       } else {
         toast({
           title: "Error",
@@ -80,7 +79,7 @@ export default function TaskView() {
       console.error("Error updating task status:", error);
       // Handle error, e.g., revert the drag and drop operation or display an error message
     }
-  }, []);
+  }, [addNotification]);
 
   const handleTaskCreate = useCallback(async (newTask: Task) => {
     try {
@@ -95,25 +94,26 @@ export default function TaskView() {
         // Update the tasks state with the updated task from the backend
         setTasks((prevTasks) => [taskCreatedFromBackend, ...prevTasks]);
 
-        toast({
-          title: "✅ Task Added",
-          description:
-            "Task was added successfully!",
-          variant: "destructive",
-        });
+        addNotification("✅ Task was added successfully!", newTask.title);
       } else {
         toast({
           title: "Error",
           description:
             "Failed to create task. Unexpected response from server.",
-          variant: "default",
+          variant: "destructive",
         });
       }
       setIsTaskFormOpen(false);
     } catch (error) {
       console.error("Error creating task:", error);
+      toast({
+        title: "Error",
+        description:
+          "Failed to create task. Unexpected response from server.",
+        variant: "destructive",
+      });
     }
-  }, []);
+  }, [addNotification]);
 
   const handleConfirmDelete = useCallback(async () => {
     try {
@@ -124,11 +124,7 @@ export default function TaskView() {
         });
         if (response.status === 204) {
           setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskToDelete.id));
-          toast({
-            title: "✅Task Deleted",
-            description: "Task was deleted successfully!",
-            variant: "default",
-          });
+          addNotification("✅ Task was deleted successfully!", taskToDelete.title);
         } else {
           toast({
             title: "Error",
@@ -148,7 +144,7 @@ export default function TaskView() {
       setIsDeleteModalOpen(false);
       setTaskToDelete(null);
     }
-  }, [taskToDelete]);
+  }, [taskToDelete, addNotification]);
 
   // Placeholder handlers for onEdit and onDelete
   const handleEdit = (task: Task) => {
@@ -194,12 +190,12 @@ export default function TaskView() {
         initialTask={taskToEdit}
       />
 
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen} taskToDelete={taskToDelete}>
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Task</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this task "{taskToDelete?.title}"? This action cannot be
+              Are you sure you want to delete the selected task? This action cannot be
               undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

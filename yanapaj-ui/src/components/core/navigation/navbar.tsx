@@ -8,15 +8,15 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuItem, DropdownMenuSeparator,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BellIcon } from "@radix-ui/react-icons";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/theme/mode-toggle.tsx";
-import { useState } from "react";
+import { useContext } from "react";
 import {
   Card,
   CardContent,
@@ -25,11 +25,18 @@ import {
   CardTitle,
 } from "@/components/ui/card.tsx";
 import { useAuth } from "@/context/auth-context.tsx";
+import { NotificationContext } from "@/context/notification-context.tsx";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const [notificationCount, setNotificationCount] = useState(0);
+  const {
+    notificationCount,
+    notifications,
+    clearNotifications,
+    toggleNotifications, // <-- Added destructuring
+    isNotificationsEnabled, // <-- Added destructuring
+  } = useContext(NotificationContext);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -37,24 +44,8 @@ const Navbar = () => {
     navigate("/");
   };
 
-  const components: { title: string; href: string; description: string }[] = [
-    {
-      title: "Alert Dialog",
-      href: "/docs/primitives/alert-dialog",
-      description: "A modal dialog that interrupts the user.",
-    },
-    {
-      title: "Hover Card",
-      href: "/docs/primitives/hover-card",
-      description:
-        "For sighted users to preview content available behind a link.",
-    },
-  ];
-
   const handleSettings = () => {
-    setNotificationCount(notificationCount + 1);
-
-    //here may be recieved the notification and be pushed here, or i dont know how we would handle this logic.
+    console.log("Clicked on Settings.")
   };
 
   return (
@@ -76,7 +67,7 @@ const Navbar = () => {
       <div className="flex items-center space-x-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="p-2 rounded-full relative">
+            <Button variant="ghost" className="p-2 rounded-full relative" onClick={clearNotifications}>
               <BellIcon className="h-6 w-6" />
               {notificationCount > 0 && (
                 <span className="absolute top-1 right-1 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">
@@ -88,15 +79,15 @@ const Navbar = () => {
           {notificationCount > 0 && (
             <DropdownMenuContent className="w-72">
               <ul className="grid">
-                {components.map((component) => (
-                  <DropdownMenuItem key={component.title}>
+                {notifications.map((notification) => (
+                  <DropdownMenuItem key={notification.id}>
                     <Card>
                       <CardHeader>
-                        <CardTitle>{component.title} </CardTitle>
+                        <CardTitle>{notification.taskTitle}</CardTitle>
                       </CardHeader>
                       <CardContent>
                         <CardDescription>
-                          {component.description}
+                          {notification.message}
                         </CardDescription>
                       </CardContent>
                     </Card>
@@ -114,9 +105,14 @@ const Navbar = () => {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-48">
+            <DropdownMenuItem onClick={toggleNotifications}> {/* <-- Add toggle button */}
+              {isNotificationsEnabled ? 'Disable Notifications' : 'Enable Notifications'}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator /> {/* <-- Add a separator */}
             <DropdownMenuItem onClick={handleSettings}>
               Preferences
             </DropdownMenuItem>
+            <DropdownMenuSeparator /> {/* <-- Add a separator */}
             <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
