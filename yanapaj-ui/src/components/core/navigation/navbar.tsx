@@ -8,8 +8,9 @@ import {
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem, DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BellIcon } from "@radix-ui/react-icons";
@@ -34,18 +35,14 @@ const Navbar = () => {
     notificationCount,
     notifications,
     clearNotifications,
-    toggleNotifications, // <-- Added destructuring
-    isNotificationsEnabled, // <-- Added destructuring
+    toggleNotifications,
+    isNotificationsEnabled,
   } = useContext(NotificationContext);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     logout();
     navigate("/");
-  };
-
-  const handleSettings = () => {
-    console.log("Clicked on Settings.")
   };
 
   return (
@@ -77,7 +74,11 @@ const Navbar = () => {
             </Button>
           </DropdownMenuTrigger>
           {notificationCount > 0 && (
-            <DropdownMenuContent className="w-72" onClick={clearNotifications} key={notificationCount}>
+            <DropdownMenuContent
+              className="w-72"
+              onClick={clearNotifications}
+              key={notificationCount}
+            >
               <ul className="grid gap-2">
                 {notifications.map((notification) => (
                   <DropdownMenuItem key={notification.id}>
@@ -105,12 +106,12 @@ const Navbar = () => {
             </Avatar>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-48">
-            <DropdownMenuItem onClick={toggleNotifications}> {/* <-- Add toggle button */}
-              {isNotificationsEnabled ? 'Disable Notifications' : 'Enable Notifications'}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator /> {/* <-- Add a separator */}
-            <DropdownMenuItem onClick={handleSettings}>
-              Preferences
+            <DropdownMenuItem onClick={toggleNotifications}>
+              {" "}
+              {/* <-- Add toggle button */}
+              {isNotificationsEnabled
+                ? "Disable Notifications"
+                : "Enable Notifications"}
             </DropdownMenuItem>
             <DropdownMenuSeparator /> {/* <-- Add a separator */}
             <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>

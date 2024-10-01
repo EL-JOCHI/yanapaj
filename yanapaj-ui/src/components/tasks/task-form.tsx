@@ -1,28 +1,47 @@
 import { cn } from "@/lib/utils.ts";
 import { format } from "date-fns";
 import { Task } from "@/client";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form.tsx";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form.tsx";
 import { Input } from "@/components/ui/input.tsx";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover.tsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover.tsx";
 import { Button } from "@/components/ui/button.tsx";
 import { Calendar } from "@/components/ui/calendar.tsx";
 import { CalendarIcon } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select.tsx";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-const TaskSchema = z
-  .object({
-    title: z.string().min(4, { message: "The Task title should be at least 4 characters."})
-      .max(50, { message: "The Task title should not be longer than 50 characters."}),
-    description: z
-      .string(),
-    dueDate: z.date({
-      required_error: "Due date is required",
+const TaskSchema = z.object({
+  title: z
+    .string()
+    .min(4, { message: "The Task title should be at least 4 characters." })
+    .max(50, {
+      message: "The Task title should not be longer than 50 characters.",
     }),
-    status: z.enum(["TODO", "IN_PROGRESS", "BLOCKED", "DONE"]),
-  });
+  description: z.string(),
+  dueDate: z.date({
+    required_error: "Due date is required",
+  }),
+  status: z.enum(["TODO", "IN_PROGRESS", "BLOCKED", "DONE"]),
+});
 
 interface TaskFormProps {
   initialTask?: Task | null;
@@ -53,7 +72,7 @@ const TaskForm = ({ initialTask, onSubmit }: TaskFormProps) => {
   };
 
   return (
-    <Form {...form} >
+    <Form {...form}>
       <form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
         <FormField
           control={form.control}
@@ -77,9 +96,7 @@ const TaskForm = ({ initialTask, onSubmit }: TaskFormProps) => {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="dark:text-sky-50">
-                📝 Description
-              </FormLabel>
+              <FormLabel className="dark:text-sky-50">📝 Description</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Enter task description"
@@ -120,9 +137,7 @@ const TaskForm = ({ initialTask, onSubmit }: TaskFormProps) => {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date("1900-01-01")
-                      }
+                      disabled={(date) => date < new Date("1900-01-01")}
                       initialFocus
                     />
                   </PopoverContent>
@@ -139,8 +154,7 @@ const TaskForm = ({ initialTask, onSubmit }: TaskFormProps) => {
             <FormItem>
               <FormLabel className="dark:text-sky-50">🚥 Status</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange}
-                        value={field.value} >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>

@@ -25,12 +25,12 @@ export const NotificationContext = createContext<NotificationContextType>({
   toggleNotifications: () => {},
 });
 
-export default function NotificationProvider(props: Readonly<PropsWithChildren<{}>>): ReactElement { // <-- Added return type and props type
+export default function NotificationProvider(props: Readonly<PropsWithChildren<{}>>): ReactElement {
   const notificationState = useNotification();
 
   return (
     <NotificationContext.Provider value={notificationState}>
-      {props.children} {/* <-- Using props.children */}
+      {props.children}
     </NotificationContext.Provider>
   );
-};
+}

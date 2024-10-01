@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 
-interface CustomNotification { // Renamed to avoid conflict with browser's Notification
+interface CustomNotification {
+  // Renamed to avoid conflict with browser's Notification
   id: number;
   message: string;
   taskTitle: string;
@@ -11,21 +12,27 @@ export const useNotification = () => {
   const [notificationCount, setNotificationCount] = useState(0);
   const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false); // Default to false
 
-  const addNotification = useCallback((message: string, taskTitle: string) => {
-    const newNotification: CustomNotification = {
-      id: Date.now(), // Simple unique ID generation
-      message,
-      taskTitle,
-    };
+  const addNotification = useCallback(
+    (message: string, taskTitle: string) => {
+      const newNotification: CustomNotification = {
+        id: Date.now(), // Simple unique ID generation
+        message,
+        taskTitle,
+      };
 
-    setNotifications((prevNotifications) => [...prevNotifications, newNotification]);
-    setNotificationCount((prevCount) => prevCount + 1);
+      setNotifications((prevNotifications) => [
+        ...prevNotifications,
+        newNotification,
+      ]);
+      setNotificationCount((prevCount) => prevCount + 1);
 
-    // Browser notification
-    if (isNotificationsEnabled && Notification.permission === 'granted') {
-      new Notification(taskTitle, { body: message });
-    }
-  }, [isNotificationsEnabled]);
+      // Browser notification
+      if (isNotificationsEnabled && Notification.permission === "granted") {
+        new Notification(taskTitle, { body: message });
+      }
+    },
+    [isNotificationsEnabled],
+  );
 
   const clearNotifications = () => {
     setNotifications([]);
@@ -38,12 +45,18 @@ export const useNotification = () => {
 
   // Request permission for browser notifications on component mount
   useEffect(() => {
-    if (Notification.permission === 'default') {
+    if (Notification.permission === "default") {
       Notification.requestPermission();
     }
-    if (isNotificationsEnabled && notifications.length > 0 && Notification.permission === 'granted') {
+    if (
+      isNotificationsEnabled &&
+      notifications.length > 0 &&
+      Notification.permission === "granted"
+    ) {
       const latestNotification = notifications[notifications.length - 1];
-      new Notification(latestNotification.taskTitle, { body: latestNotification.message });
+      new Notification(latestNotification.taskTitle, {
+        body: latestNotification.message,
+      });
     }
   }, [notifications, isNotificationsEnabled]);
 
