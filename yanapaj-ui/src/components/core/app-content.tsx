@@ -3,7 +3,7 @@ import Navbar from "@/components/core/navigation/navbar.tsx";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Login from "@/components/login/login.tsx";
 import Register from "@/components/login/register.tsx";
-import Dashboard from "@/components/tasks/dashboard.tsx";
+import Dashboard from "@/components/dashboard/dashboard.tsx";
 import ProtectedRoute from "@/components/login/protected-route.tsx";
 import TaskView from "@/components/tasks/task-view.tsx";
 
