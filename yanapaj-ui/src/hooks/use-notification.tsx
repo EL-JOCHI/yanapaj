@@ -1,21 +1,21 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from "react";
+import { NotificationContext } from "@/context/notification-context.tsx";
 
 interface CustomNotification {
-  // Renamed to avoid conflict with browser's Notification
   id: number;
   message: string;
   taskTitle: string;
 }
 
 export const useNotification = () => {
+  const { isNotificationsEnabled } = useContext(NotificationContext);
   const [notifications, setNotifications] = useState<CustomNotification[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
-  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false); // Default to false
 
   const addNotification = useCallback(
     (message: string, taskTitle: string) => {
       const newNotification: CustomNotification = {
-        id: Date.now(), // Simple unique ID generation
+        id: Date.now(),
         message,
         taskTitle,
       };
@@ -37,10 +37,6 @@ export const useNotification = () => {
   const clearNotifications = () => {
     setNotifications([]);
     setNotificationCount(0);
-  };
-
-  const toggleNotifications = () => {
-    setIsNotificationsEnabled((prevState) => !prevState);
   };
 
   // Request permission for browser notifications on component mount
@@ -65,7 +61,5 @@ export const useNotification = () => {
     notificationCount,
     addNotification,
     clearNotifications,
-    isNotificationsEnabled,
-    toggleNotifications,
   };
 };

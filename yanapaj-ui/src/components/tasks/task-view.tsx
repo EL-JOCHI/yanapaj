@@ -17,6 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog.tsx";
 import { NotificationContext } from "@/context/notification-context.tsx";
+import { differenceInMilliseconds } from "date-fns";
 
 export default function TaskView() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -27,7 +28,7 @@ export default function TaskView() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
-  const { addNotification } = useContext(NotificationContext);
+  const { addNotification, isNotificationsEnabled } = useContext(NotificationContext);
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -46,6 +47,44 @@ export default function TaskView() {
       console.error("Error fetching tasks:", error);
     });
   }, []);
+
+  // Function to check for due tasks and send notifications
+  const checkDueTasks = useCallback(() => {
+    tasks.forEach((task) => {
+      if (task.dueDate) {
+        const dueDate = new Date(task.dueDate);
+        const millisecondsUntilDue = differenceInMilliseconds(dueDate, new Date());
+        const hoursUntilDue = millisecondsUntilDue / (1000 * 60 * 60);
+
+        if (hoursUntilDue <= 24 && isNotificationsEnabled) {
+          if (hoursUntilDue >= 0) {
+            addNotification(
+              `Task "${task.title}" is due in ${hoursUntilDue.toFixed(
+                1,
+              )} hours!`,
+              task.title,
+            );
+          } else {
+            // Task is overdue
+            const hoursOverdue = Math.abs(hoursUntilDue);
+            addNotification(
+              `Task "${task.title}" is overdue by ${hoursOverdue.toFixed(
+                1,
+              )} hours!`,
+              task.title,
+            );
+          }
+        }
+      }
+    });
+  }, [tasks, addNotification, isNotificationsEnabled]);
+
+  // Set up interval to check for due tasks every hour
+  useEffect(() => {
+    const intervalId = setInterval(checkDueTasks, 60 * 60 * 1000);
+    return () => clearInterval(intervalId);
+  }, [checkDueTasks]);
+
 
   // Update task status in the backend and then update the UI
   const handleTaskUpdate = useCallback(
@@ -66,11 +105,12 @@ export default function TaskView() {
               task.id === updatedTask.id ? updatedTaskFromBackend : task,
             ),
           );
-
-          addNotification(
-            "✅ Task was updated successfully!",
-            updatedTask.title,
-          );
+          if (isNotificationsEnabled) {
+            addNotification(
+              "✅ Task was updated successfully!",
+              updatedTask.title,
+            );
+          }
         } else {
           toast({
             title: "Error",
@@ -85,7 +125,7 @@ export default function TaskView() {
         // Handle error, e.g., revert the drag and drop operation or display an error message
       }
     },
-    [addNotification],
+    [addNotification, isNotificationsEnabled],
   );
 
   const handleTaskCreate = useCallback(
@@ -101,8 +141,9 @@ export default function TaskView() {
 
           // Update the tasks state with the updated task from the backend
           setTasks((prevTasks) => [taskCreatedFromBackend, ...prevTasks]);
-
-          addNotification("✅ Task was added successfully!", newTask.title);
+          if (isNotificationsEnabled) {
+            addNotification("✅ Task was added successfully!", newTask.title);
+          }
         } else {
           toast({
             title: "Error",
@@ -122,7 +163,7 @@ export default function TaskView() {
         });
       }
     },
-    [addNotification],
+    [addNotification, isNotificationsEnabled],
   );
 
   const handleConfirmDelete = useCallback(async () => {
@@ -136,10 +177,12 @@ export default function TaskView() {
           setTasks((prevTasks) =>
             prevTasks.filter((t) => t.id !== taskToDelete.id),
           );
+          if (isNotificationsEnabled) {
           addNotification(
             "✅ Task was deleted successfully!",
             taskToDelete.title,
           );
+          }
         } else {
           toast({
             title: "Error",
@@ -159,7 +202,7 @@ export default function TaskView() {
       setIsDeleteModalOpen(false);
       setTaskToDelete(null);
     }
-  }, [taskToDelete, addNotification]);
+  }, [taskToDelete, addNotification, isNotificationsEnabled]);
 
   // Placeholder handlers for onEdit and onDelete
   const handleEdit = (task: Task) => {

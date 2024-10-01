@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, ReactElement } from "react";
+import { createContext, PropsWithChildren, ReactElement, useState, useEffect } from "react";
 import { useNotification } from "@/hooks/use-notification";
 
 interface CustomNotification {
@@ -26,10 +26,40 @@ export const NotificationContext = createContext<NotificationContextType>({
 });
 
 export default function NotificationProvider(props: Readonly<PropsWithChildren<{}>>): ReactElement {
+  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false);
+
+  // Load preference from localStorage on mount
+  useEffect(() => {
+    const storedPreference = localStorage.getItem("notificationsEnabled");
+    if (storedPreference !== null) {
+      setIsNotificationsEnabled(storedPreference === "true");
+    }
+  }, []);
+
+  // Save preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("notificationsEnabled", isNotificationsEnabled.toString());
+  }, [isNotificationsEnabled]);
+
+  const toggleNotifications = () => {
+    setIsNotificationsEnabled((prevState) => !prevState);
+  };
+
+  // Call useNotification here, before using notificationState
   const notificationState = useNotification();
 
+  const value: NotificationContextType = {
+    isNotificationsEnabled,
+    toggleNotifications,
+    // These values come from useNotification
+    notifications: notificationState.notifications,
+    notificationCount: notificationState.notificationCount,
+    addNotification: notificationState.addNotification,
+    clearNotifications: notificationState.clearNotifications,
+  };
+
   return (
-    <NotificationContext.Provider value={notificationState}>
+    <NotificationContext.Provider value={value}>
       {props.children}
     </NotificationContext.Provider>
   );

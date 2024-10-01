@@ -75,7 +75,7 @@ const Navbar = () => {
           </DropdownMenuTrigger>
           {notificationCount > 0 && (
             <DropdownMenuContent
-              className="w-72"
+              className="w-72 max-h-[300px] overflow-y-auto"
               onClick={clearNotifications}
               key={notificationCount}
             >
@@ -107,7 +107,6 @@ const Navbar = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-48">
             <DropdownMenuItem onClick={toggleNotifications}>
-              {" "}
               {/* <-- Add toggle button */}
               {isNotificationsEnabled
                 ? "Disable Notifications"
