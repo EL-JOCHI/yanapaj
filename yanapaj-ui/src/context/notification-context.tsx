@@ -26,7 +26,11 @@ export const NotificationContext = createContext<NotificationContextType>({
 });
 
 export default function NotificationProvider(props: Readonly<PropsWithChildren<{}>>): ReactElement {
-  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(false);
+  // Load the preference from localStorage on mount
+  const [isNotificationsEnabled, setIsNotificationsEnabled] = useState(() => {
+    const storedPreference = localStorage.getItem("notificationsEnabled");
+    return storedPreference ? storedPreference === "true" : false; // Use stored preference or default to false
+  });
 
   // Load preference from localStorage on mount
   useEffect(() => {

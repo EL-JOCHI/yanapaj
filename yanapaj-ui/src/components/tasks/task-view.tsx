@@ -17,9 +17,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog.tsx";
 import { NotificationContext } from "@/context/notification-context.tsx";
-import { differenceInMilliseconds } from "date-fns";
+import { differenceInDays, differenceInHours } from "date-fns";
 
 export default function TaskView() {
+
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
@@ -53,26 +54,39 @@ export default function TaskView() {
     tasks.forEach((task) => {
       if (task.dueDate) {
         const dueDate = new Date(task.dueDate);
-        const millisecondsUntilDue = differenceInMilliseconds(dueDate, new Date());
-        const hoursUntilDue = millisecondsUntilDue / (1000 * 60 * 60);
+        const daysUntilDue = differenceInDays(dueDate, new Date());
+        const hoursUntilDue = differenceInHours(dueDate, new Date());
 
-        if (hoursUntilDue <= 24 && isNotificationsEnabled) {
-          if (hoursUntilDue >= 0) {
+        if (isNotificationsEnabled) {
+          if (daysUntilDue >= 1) {
+            // Due in more than 24 hours (at least 1 day)
             addNotification(
-              `Task "${task.title}" is due in ${hoursUntilDue.toFixed(
-                1,
-              )} hours!`,
+              `🗓️ Task "${task.title}" is due in ${daysUntilDue} days!`,
               task.title,
             );
-          } else {
-            // Task is overdue
-            const hoursOverdue = Math.abs(hoursUntilDue);
+          } else if (hoursUntilDue <= 24 && hoursUntilDue >= 0) {
+            // Due Soon Notification (within 24 hours)
             addNotification(
-              `Task "${task.title}" is overdue by ${hoursOverdue.toFixed(
-                1,
-              )} hours!`,
+              `⏰ Task "${task.title}" is due in ${hoursUntilDue} hours!`,
               task.title,
             );
+          } else if (hoursUntilDue < 0) {
+            // Overdue Notification
+            if (daysUntilDue <= -1) {
+              // Overdue by at least one day
+              const daysOverdue = Math.abs(daysUntilDue);
+              addNotification(
+                `⚠️ Task "${task.title}" is overdue by ${daysOverdue} days!`,
+                task.title,
+              );
+            } else {
+              // Overdue by less than a day (display in hours)
+              const hoursOverdue = Math.abs(hoursUntilDue);
+              addNotification(
+                `⚠️ Task "${task.title}" is overdue by ${hoursOverdue} hours!`,
+                task.title,
+              );
+            }
           }
         }
       }
