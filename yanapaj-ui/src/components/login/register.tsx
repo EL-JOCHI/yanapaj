@@ -74,7 +74,7 @@ export default function Register() {
         }
 
         login();
-        navigate("/dashboard");
+        navigate("/tasks");
         return;
       }
 

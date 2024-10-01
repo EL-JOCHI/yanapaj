@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import TaskGridView from "./task-grid-view";
 import TaskListView from "./task-list-view";
 import { Task, TaskControllerService } from "@/client";
@@ -7,15 +7,19 @@ import TaskToolbar from "@/components/tasks/task-toolbar.tsx";
 import TaskModal from "@/components/tasks/task-modal.tsx";
 import { toast } from "@/hooks/use-toast.ts";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter,
+  AlertDialogDescription,
+  AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog.tsx";
+import { NotificationContext } from "@/context/notification-context.tsx";
+import { differenceInMilliseconds } from "date-fns";
 
 export default function TaskView() {
-
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
@@ -24,12 +28,13 @@ export default function TaskView() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
+  const { addNotification, isNotificationsEnabled } = useContext(NotificationContext);
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
         const response = await TaskControllerService.getTasks({
           client: apiClient,
-
         });
         const content = response.data?.content || [];
         setTasks(content);
@@ -43,77 +48,123 @@ export default function TaskView() {
     });
   }, []);
 
-  // Update task status in the backend and then update the UI
-  const handleTaskUpdate = useCallback(async (updatedTask: Task) => {
-    try {
-      const response = await TaskControllerService.updateTask({
-        client: apiClient,
-        body: updatedTask,
-        path: { id: updatedTask.id! },
-      });
+  // Function to check for due tasks and send notifications
+  const checkDueTasks = useCallback(() => {
+    tasks.forEach((task) => {
+      if (task.dueDate) {
+        const dueDate = new Date(task.dueDate);
+        const millisecondsUntilDue = differenceInMilliseconds(dueDate, new Date());
+        const hoursUntilDue = millisecondsUntilDue / (1000 * 60 * 60);
 
-      if (response.status === 200 && response.data) {
-        const updatedTaskFromBackend: Task = response.data;
-
-        // Update the tasks state with the updated task from the backend
-        setTasks((prevTasks) =>
-          prevTasks.map((task) =>
-            task.id === updatedTask.id ? updatedTaskFromBackend : task,
-          ),
-        );
-
-        toast({
-          title: "✅ Task Updated",
-          description: "Task was updated successfully!",
-          variant: "default",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description:
-            "Failed to update task. Unexpected response from server.",
-          variant: "destructive",
-        });
+        if (hoursUntilDue <= 24 && isNotificationsEnabled) {
+          if (hoursUntilDue >= 0) {
+            addNotification(
+              `Task "${task.title}" is due in ${hoursUntilDue.toFixed(
+                1,
+              )} hours!`,
+              task.title,
+            );
+          } else {
+            // Task is overdue
+            const hoursOverdue = Math.abs(hoursUntilDue);
+            addNotification(
+              `Task "${task.title}" is overdue by ${hoursOverdue.toFixed(
+                1,
+              )} hours!`,
+              task.title,
+            );
+          }
+        }
       }
-      setIsEditModalOpen(false);
-    } catch (error) {
-      console.error("Error updating task status:", error);
-      // Handle error, e.g., revert the drag and drop operation or display an error message
-    }
-  }, []);
+    });
+  }, [tasks, addNotification, isNotificationsEnabled]);
 
-  const handleTaskCreate = useCallback(async (newTask: Task) => {
-    try {
-      const response = await TaskControllerService.createTask({
-        client: apiClient,
-        body: newTask,
-      });
+  // Set up interval to check for due tasks every hour
+  useEffect(() => {
+    const intervalId = setInterval(checkDueTasks, 60 * 60 * 1000);
+    return () => clearInterval(intervalId);
+  }, [checkDueTasks]);
 
-      if (response.status === 201 && response.data) {
-        const taskCreatedFromBackend: Task = response.data;
 
-        // Update the tasks state with the updated task from the backend
-        setTasks((prevTasks) => [taskCreatedFromBackend, ...prevTasks]);
-
-        toast({
-          title: "✅ Task Added",
-          description:
-            "Task was added successfully!",
-          variant: "destructive",
+  // Update task status in the backend and then update the UI
+  const handleTaskUpdate = useCallback(
+    async (updatedTask: Task) => {
+      try {
+        const response = await TaskControllerService.updateTask({
+          client: apiClient,
+          body: updatedTask,
+          path: { id: updatedTask.id! },
         });
-      } else {
+
+        if (response.status === 200 && response.data) {
+          const updatedTaskFromBackend: Task = response.data;
+
+          // Update the tasks state with the updated task from the backend
+          setTasks((prevTasks) =>
+            prevTasks.map((task) =>
+              task.id === updatedTask.id ? updatedTaskFromBackend : task,
+            ),
+          );
+          if (isNotificationsEnabled) {
+            addNotification(
+              "✅ Task was updated successfully!",
+              updatedTask.title,
+            );
+          }
+        } else {
+          toast({
+            title: "Error",
+            description:
+              "Failed to update task. Unexpected response from server.",
+            variant: "destructive",
+          });
+        }
+        setIsEditModalOpen(false);
+      } catch (error) {
+        console.error("Error updating task status:", error);
+        // Handle error, e.g., revert the drag and drop operation or display an error message
+      }
+    },
+    [addNotification, isNotificationsEnabled],
+  );
+
+  const handleTaskCreate = useCallback(
+    async (newTask: Task) => {
+      try {
+        const response = await TaskControllerService.createTask({
+          client: apiClient,
+          body: newTask,
+        });
+
+        if (response.status === 201 && response.data) {
+          const taskCreatedFromBackend: Task = response.data;
+
+          // Update the tasks state with the updated task from the backend
+          setTasks((prevTasks) => [taskCreatedFromBackend, ...prevTasks]);
+          if (isNotificationsEnabled) {
+            addNotification("✅ Task was added successfully!", newTask.title);
+          }
+        } else {
+          toast({
+            title: "Error",
+            description:
+              "Failed to create task. Unexpected response from server.",
+            variant: "destructive",
+          });
+        }
+        setIsTaskFormOpen(false);
+      } catch (error) {
+        console.error("Error creating task:", error);
         toast({
           title: "Error",
           description:
             "Failed to create task. Unexpected response from server.",
-          variant: "default",
+          variant: "destructive",
         });
       }
-      setIsTaskFormOpen(false);
-    } catch (error) {
-      console.error("Error creating task:", error);
-    }
-  }, []);
+    },
+    [addNotification, isNotificationsEnabled],
+  );
 
   const handleConfirmDelete = useCallback(async () => {
     try {
@@ -123,12 +174,15 @@ export default function TaskView() {
           path: { id: taskToDelete.id! },
         });
         if (response.status === 204) {
-          setTasks((prevTasks) => prevTasks.filter((t) => t.id !== taskToDelete.id));
-          toast({
-            title: "✅Task Deleted",
-            description: "Task was deleted successfully!",
-            variant: "default",
-          });
+          setTasks((prevTasks) =>
+            prevTasks.filter((t) => t.id !== taskToDelete.id),
+          );
+          if (isNotificationsEnabled) {
+          addNotification(
+            "✅ Task was deleted successfully!",
+            taskToDelete.title,
+          );
+          }
         } else {
           toast({
             title: "Error",
@@ -148,7 +202,7 @@ export default function TaskView() {
       setIsDeleteModalOpen(false);
       setTaskToDelete(null);
     }
-  }, [taskToDelete]);
+  }, [taskToDelete, addNotification, isNotificationsEnabled]);
 
   // Placeholder handlers for onEdit and onDelete
   const handleEdit = (task: Task) => {
@@ -194,13 +248,13 @@ export default function TaskView() {
         initialTask={taskToEdit}
       />
 
-      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen} taskToDelete={taskToDelete}>
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Task</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this task "{taskToDelete?.title}"? This action cannot be
-              undone.
+              Are you sure you want to delete the selected task? This action
+              cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

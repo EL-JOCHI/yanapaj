@@ -68,7 +68,7 @@ export default function Login() {
       });
 
       login();
-      navigate("/dashboard");
+      navigate("/tasks");
     } catch (error) {
       console.error("Login error:", error);
       toast({

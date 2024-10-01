@@ -15,11 +15,11 @@ const AppContent = () => {
       <Routes>
         <Route
           path="/"
-          element={isLoggedIn ? <Navigate to="/dashboard" /> : <Login />}
+          element={isLoggedIn ? <Navigate to="/tasks" /> : <Login />}
         />
         <Route
           path="/register"
-          element={isLoggedIn ? <Navigate to="/dashboard" /> : <Register />}
+          element={isLoggedIn ? <Navigate to="/tasks" /> : <Register />}
         />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
