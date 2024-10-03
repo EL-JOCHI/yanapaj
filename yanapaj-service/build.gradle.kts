@@ -3,6 +3,7 @@ plugins {
 	id("org.springframework.boot") version "3.3.3"
 	id("io.spring.dependency-management") version "1.1.6"
 	id("com.diffplug.spotless") version "7.0.0.BETA2"
+	jacoco
 }
 
 group = "com.mahatec"
@@ -79,5 +80,21 @@ spotless {
 		cleanthat()
 		googleJavaFormat().aosp()
 		formatAnnotations()
+	}
+}
+
+tasks.test {
+	finalizedBy(tasks.jacocoTestReport) // report is always generated after tests run
+}
+
+tasks.jacocoTestReport {
+	dependsOn(tasks.test) // tests are required to run before generating the report
+}
+
+tasks.jacocoTestReport {
+	reports {
+		xml.required = false
+		csv.required = false
+		html.outputLocation = layout.buildDirectory.dir("jacocoHtml")
 	}
 }
