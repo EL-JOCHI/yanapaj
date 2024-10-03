@@ -107,6 +107,47 @@ These instructions will get you a copy of the project up and running on your loc
    ```
    You can access the UI at `http://localhost:3000`.
 
+## 🧪 Running Tests
+
+### 🍃 `yanapej-service`
+
+1. **Navigate to the backend directory:**
+   ```bash
+   cd yanapaj-service
+   ```
+
+2. **Run the tests using Gradle:**
+   ```bash
+   ./gradlew test
+   ```
+   This command will execute all unit tests in the backend project.
+
+- To check the coverage, go to the generated report: http://localhost:63342/yanapaj/yanapaj.yanapaj-service/build/jacocoHtml/index.html 
+
+### ✨ `yanapej-ui`
+
+1. **Navigate to the frontend directory:**
+   ```bash
+   cd yanapaj-ui
+   ```
+
+2. **Run the tests using npm (or yarn):**
+   ```bash
+   npm run test
+   ```
+   This command will execute all unit tests in the frontend project using Vitest.
+
+**Optional:**
+
+- To run tests with a graphical user interface (GUI), use:
+  ```bash
+  npm run test-ui
+  ```
+- To generate code coverage reports, use:
+  ```bash
+  npm run coverage
+  ```
+
 ## 📄 License
 This project is licensed under the MIT License.
 See the [LICENSE](LICENSE) file for more information.

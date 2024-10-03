@@ -75,10 +75,10 @@ export default function TaskCard({
         </div>
       </div>
       <div className="mt-4 flex items-center justify-end">
-        <Button variant="ghost" size="icon" onClick={() => onEdit(task)}>
+        <Button variant="ghost" size="icon" onClick={() => onEdit(task)} aria-label="Edit Task">
           <Edit className="h-4 w-4" />
         </Button>
-        <Button variant="ghost" size="icon" onClick={() => onDelete(task)}>
+        <Button variant="ghost" size="icon" onClick={() => onDelete(task)} aria-label="Delete Task">
           <Trash className="h-4 w-4" />
         </Button>
       </div>

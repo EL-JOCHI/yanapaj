@@ -24,4 +24,10 @@ export default defineConfig({
     host: true,
     origin: "http://0.0.0.0:3000",
   },
+  test: {
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./tests/setup.ts'], // Path to your setup file
+    // ... other Vitest configurations
+  },
 });

@@ -14,7 +14,7 @@ const AppContent = () => {
       {isLoggedIn && <Navbar />}
       <Routes>
         <Route
-          path="/"
+          path="*"
           element={isLoggedIn ? <Navigate to="/tasks" /> : <Login />}
         />
         <Route

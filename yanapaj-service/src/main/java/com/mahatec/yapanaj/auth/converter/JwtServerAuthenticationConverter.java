@@ -2,7 +2,6 @@ package com.mahatec.yapanaj.auth.converter;
 
 import com.mahatec.yapanaj.auth.jwt.JwtHelper;
 import com.mahatec.yapanaj.auth.jwt.JwtToken;
-import com.mahatec.yapanaj.auth.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
@@ -19,7 +18,6 @@ final class JwtServerAuthenticationConverter implements ServerAuthenticationConv
 
     private static final String BEARER = "Bearer ";
     private final JwtHelper jwtService;
-    private final UserRepository userRepository;
 
     @Override
     public Mono<Authentication> convert(final ServerWebExchange exchange) {
